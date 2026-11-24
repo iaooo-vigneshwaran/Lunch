@@ -1,0 +1,26 @@
+{
+  "name": "lunch-account",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/build-web.mjs",
+    "prestart": "npm run build",
+    "start": "node dist/server.js"
+  },
+  "engines": {
+    "node": ">=20.10"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "5.9.3",
+    "esbuild": "0.28.2"
+  },
+  "dependencies": {
+    "firebase": "12.19.0"
+  },
+  "overrides": {
+    "@firebase/app": "0.16.2",
+    "@firebase/app-compat": "0.5.18"
+  }
+}

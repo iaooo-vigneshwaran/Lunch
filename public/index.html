@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163d30">
+  <meta name="description" content="Record lunch orders and see what everyone owes.">
+  <title>Lunch Account</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-icon" aria-hidden="true"><span></span></span>Lunch Account</div>
+      <nav id="main-nav" aria-label="Main">
+        <button type="button" id="daily-tab" aria-current="page">Daily entry</button>
+        <button type="button" id="monthly-tab">Monthly summary</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="cloud-access" class="panel cloud-access" aria-labelledby="cloud-title" hidden>
+      <div><h2 id="cloud-title">Firestore ledger</h2><p id="cloud-status" role="status"></p></div>
+      <div class="cloud-actions">
+        <button id="cloud-sign-in" class="primary" type="button" hidden>Sign in with Google</button>
+        <button id="cloud-import" class="secondary" type="button" hidden>Import local entries</button>
+        <button id="cloud-sign-out" class="secondary" type="button" hidden>Sign out</button>
+      </div>
+    </section>
+    <section id="daily-page" aria-labelledby="daily-title">
+      <div class="page-header">
+        <div>
+          <h1 id="daily-title">Daily lunch</h1>
+          <p id="date-heading"></p>
+        </div>
+        <label class="date-field">Lunch date<input type="date" id="lunch-date" required></label>
+      </div>
+
+      <form id="daily-form" class="daily-layout">
+        <div class="entry">
+          <section class="panel price-panel" aria-labelledby="prices-title">
+            <h2 id="prices-title">Prices</h2>
+            <div class="prices">
+              <label>Food per portion<span class="money-field"><span aria-hidden="true">₹</span><input id="food-price" type="number" min="0" step="0.01" required inputmode="decimal"></span></label>
+              <label>Poriyal per portion<span class="money-field"><span aria-hidden="true">₹</span><input id="poriyal-price" type="number" min="0" step="0.01" required inputmode="decimal"></span></label>
+              <label>Per egg<span class="money-field"><span aria-hidden="true">₹</span><input id="egg-price" type="number" min="0" step="0.01" required inputmode="decimal"></span></label>
+            </div>
+          </section>
+
+          <section class="panel people-panel" aria-labelledby="orders-title">
+            <div class="section-heading order-heading">
+              <div><h2 id="orders-title">Lunch orders</h2><p>Bharath and Riti share one food portion.</p></div>
+              <div class="order-actions">
+                <p class="compact-total">Daily total <strong id="compact-total">₹0</strong></p>
+                <button id="manage-participants" class="secondary" type="button" disabled>Manage people</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="orders-table">
+                <thead>
+                  <tr><th scope="col">Person</th><th scope="col">Lunch</th><th scope="col">Eggs</th><th scope="col">Extra</th><th scope="col">Share</th></tr>
+                </thead>
+                <tbody id="orders"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <aside class="panel bill-panel" aria-labelledby="bill-title">
+          <section class="bill">
+            <h2 id="bill-title">Daily bill</h2>
+            <output id="daily-total">₹0</output>
+            <p id="portion-count">0 food portions</p>
+            <dl>
+              <div><dt>Food</dt><dd id="bill-food">₹0</dd></div>
+              <div><dt>Poriyal</dt><dd id="bill-poriyal">₹0</dd></div>
+              <div><dt>Eggs</dt><dd id="bill-eggs">₹0</dd></div>
+              <div><dt>Extras</dt><dd id="bill-extra">₹0</dd></div>
+            </dl>
+          </section>
+          <section class="payment" aria-labelledby="payment-title">
+            <h2 id="payment-title">Payment</h2>
+            <label for="payer">Who paid upfront?</label>
+            <select id="payer"><option value="">Not recorded</option></select>
+            <button type="submit" id="save-day" class="primary" disabled>Save day</button>
+            <p id="daily-status" class="status" role="status"></p>
+          </section>
+        </aside>
+      </form>
+    </section>
+
+    <section id="monthly-page" aria-labelledby="monthly-title" hidden>
+      <div class="page-header monthly-header">
+        <div><h1 id="monthly-title">Monthly summary</h1><p id="month-heading"></p></div>
+        <div class="period">
+          <label class="date-field">Month<input type="month" id="month" required></label>
+          <label class="date-field">Through date<input type="date" id="through" required></label>
+          <button type="button" id="full-month" class="secondary">Full month</button>
+        </div>
+      </div>
+      <div class="monthly-layout">
+        <section class="panel settlement-panel" aria-labelledby="settlement-title">
+          <div class="section-heading"><h2 id="settlement-title">People and balances</h2></div>
+          <p id="unrecorded" class="payment-notice" hidden></p>
+          <div class="table-scroll">
+            <table class="settlement-table">
+              <thead><tr><th scope="col">Person</th><th scope="col">Lunch share</th><th scope="col">Paid upfront</th><th scope="col">Net balance</th></tr></thead>
+              <tbody id="settlement"></tbody>
+            </table>
+          </div>
+        </section>
+        <aside class="panel history-panel" aria-labelledby="history-title">
+          <div class="history-total"><h2 id="history-title">Period total</h2><strong id="history-total">₹0</strong><p id="history-count"></p></div>
+          <div class="history-entries"><h2>Saved days</h2><p id="no-history">Saved lunch entries will appear here.</p><ul id="history"></ul></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="participants-dialog" aria-labelledby="participants-title">
+    <div class="dialog-heading">
+      <h2 id="participants-title">Manage people</h2>
+      <form method="dialog"><button class="secondary">Close</button></form>
+    </div>
+    <form id="add-participant" class="participant-add">
+      <label>Name<input id="participant-name" type="text" autocomplete="off" required></label>
+      <label>Meal type<select id="participant-preference" required>
+        <option value="" disabled selected>Choose meal type</option>
+        <option value="food">Full meal</option>
+        <option value="poriyal">Poriyal only</option>
+      </select></label>
+      <button class="primary" type="submit">Add person</button>
+    </form>
+    <p class="status" id="participants-status" role="status"></p>
+    <ul class="participant-list" id="participant-list"></ul>
+  </dialog>
+</body>
+</html>

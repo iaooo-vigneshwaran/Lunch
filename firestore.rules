@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function ownsLedger(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function hasVersion(data) {
+      return data.revision is string && data.revision.size() == 36;
+    }
+
+    function hasPrices(prices) {
+      return prices is map
+        && prices.keys().hasOnly(['food', 'poriyal', 'egg'])
+        && prices.food is int && prices.food >= 0
+        && prices.poriyal is int && prices.poriyal >= 0
+        && prices.egg is int && prices.egg >= 0;
+    }
+
+    match /ledgers/{uid}/profile/participants {
+      allow get: if ownsLedger(uid);
+      allow create, update: if ownsLedger(uid)
+        && request.resource.data.keys().hasOnly(['participants', 'revision'])
+        && hasVersion(request.resource.data)
+        && request.resource.data.participants is list;
+    }
+
+    match /ledgers/{uid}/days/{date} {
+      allow get, list: if ownsLedger(uid);
+      allow create, update: if ownsLedger(uid)
+        && request.resource.data.keys().hasOnly(['day', 'revision'])
+        && hasVersion(request.resource.data)
+        && date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.day is map
+        && request.resource.data.day.keys().hasOnly(['date', 'prices', 'orders', 'payer'])
+        && request.resource.data.day.date == date
+        && hasPrices(request.resource.data.day.prices)
+        && request.resource.data.day.orders is map
+        && (request.resource.data.day.payer == null || request.resource.data.day.payer is string);
+    }
+  }
+}
